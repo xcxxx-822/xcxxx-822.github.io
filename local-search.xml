@@ -4,6 +4,25 @@
   
   
   <entry>
+    <title>第一篇技术博客：解决Hexo的部署与上传</title>
+    <link href="/2026/01/19/%E7%AC%AC%E4%B8%80%E7%AF%87%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2%EF%BC%9A%E8%A7%A3%E5%86%B3Hexo%E7%9A%84%E9%83%A8%E7%BD%B2%E4%B8%8E%E4%B8%8A%E4%BC%A0/"/>
+    <url>/2026/01/19/%E7%AC%AC%E4%B8%80%E7%AF%87%E6%8A%80%E6%9C%AF%E5%8D%9A%E5%AE%A2%EF%BC%9A%E8%A7%A3%E5%86%B3Hexo%E7%9A%84%E9%83%A8%E7%BD%B2%E4%B8%8E%E4%B8%8A%E4%BC%A0/</url>
+    
+    <content type="html"><![CDATA[<h1 id="Hexo-博客搭建填坑实录：从-404-到成功上线"><a href="#Hexo-博客搭建填坑实录：从-404-到成功上线" class="headerlink" title="Hexo 博客搭建填坑实录：从 404 到成功上线"></a>Hexo 博客搭建填坑实录：从 404 到成功上线</h1><h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><ul><li><p>环境：Windows 11 &#x2F; Hexo 7.0 &#x2F; Node.js &#x2F; Git</p></li><li><p>主题：Hexo-theme-fluid</p></li><li><p>目标：将博客部署至 GitHub Pages (xcxxx-822.github.io)</p></li><li><p>流程：</p></li></ul><ol><li>准备工作：下载Node.js（Hexo的运行核心） Git（把本地网页上传到github）</li></ol><p><img src="/img/26.1.20/git.png" alt="git"></p><ol start="2"><li>本地 Hexo 框架搭建</li></ol><ul><li><p>安装框架：通过 npm 全局安装 Hexo 工具：</p></li><li><p>初始化博客：在文件夹 C:\Users\xcx\myblog 下执行：</p></li><li><p>产物：此时拥有了一个默认的 Landscape 主题博客。</p></li></ul><p><img src="/img/26.1.20/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2hexo.png" alt="本地部署Hexo成功"></p><ol start="3"><li>Fluid 主题配置</li></ol><p><img src="/img/26.1.20/fluid.png" alt="更换fluid主题 cmd界面"><br><img src="/img/26.1.20/fluid-done.png" alt="更换fluid主题 cmd界面 done"><br><img src="/img/26.1.20/fluid-local.png" alt="更换fluid主题 localpost界面"></p><ol start="4"><li>GitHub 远程部署</li></ol><ul><li><p>创建仓库：在 GitHub 新建名为 xcxxx-822.github.io 的公开仓库。</p></li><li><p>解决权限封锁问题：在 GitHub Settings 生成 Personal Access Token。</p></li></ul><p><img src="/img/26.1.20/github.png" alt="github上最终成功界面"></p><h3 id="问题-1：修改配置文件后本地样式无变化"><a href="#问题-1：修改配置文件后本地样式无变化" class="headerlink" title="问题 1：修改配置文件后本地样式无变化"></a>问题 1：修改配置文件后本地样式无变化</h3><ul><li><p>现象：在 _config.yml 中修改 theme: fluid 后，执行 hexo g 依然生成默认的 Landscape 主题文件。</p></li><li><p>原因分析：</p></li></ul><ol><li><p>配置未生效：Hexo 未能正确读取到修改后的配置文件。</p></li><li><p>主题资源缺失：在新版 Hexo 中，通过 npm 安装的主题有时无法被 Hexo 自动识别路径。</p></li></ol><ul><li>解决方法：</li></ul><ol><li><p>物理搬运：将 node_modules&#x2F;hexo-theme-fluid 文件夹手动复制到 themes&#x2F; 目录下，并重命名为 fluid。</p></li><li><p>强制清理：手动删除 public 文件夹和 db.json 文件，确保 Hexo 重新构建索引。</p></li></ol><h3 id="问题-2：部署时提示-Repository-not-found"><a href="#问题-2：部署时提示-Repository-not-found" class="headerlink" title="问题 2：部署时提示 Repository not found"></a>问题 2：部署时提示 Repository not found</h3><ul><li><p>现象：执行 hexo d 时报错 ERROR: Repository not found 或 fatal: Could not read from remote repository。</p></li><li><p>原因分析：</p></li></ul><ol><li><p>权限验证失败：SSH Key 未配置或 HTTPS 自动授权弹窗被浏览器&#x2F;防火墙拦截。</p></li><li><p>仓库错误：github上的仓库并未建立成功，导致_config.yml 中的 repo 地址错误。</p></li></ol><ul><li>解决方法：</li></ul><ol><li><p>使用 Token 验证：在 GitHub 生成 Personal Access Token (classic)。</p></li><li><p>重构 Repo 链接：在配置文件中将 Token 直接嵌入 URL 中：</p></li></ol><h3 id="问题-3：线上页面-404-或样式乱码"><a href="#问题-3：线上页面-404-或样式乱码" class="headerlink" title="问题 3：线上页面 404 或样式乱码"></a>问题 3：线上页面 404 或样式乱码</h3><ul><li><p>现象：部署成功后访问域名，显示 GitHub 默认的 404 页面，或者页面没有 CSS 样式。</p></li><li><p>原因分析：</p></li></ul><ol><li><p>分支设置错误：Hexo 默认推送到了 master 分支，但 GitHub Pages 默认读取的是 main 分支。</p></li><li><p>URL 配置偏差：_config.yml 里的 url 仍为 example.com，导致资源链接失效。</p></li></ol><ul><li>解决方法：</li></ul><p>修正 URL：将 url 修改为真实的 GitHub Pages 地址。 </p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">url:</span> <br><span class="hljs-string">https://xcxxx-822.github.io</span><br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Hexo</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Hello World</title>
     <link href="/2026/01/19/hello-world/"/>
     <url>/2026/01/19/hello-world/</url>
