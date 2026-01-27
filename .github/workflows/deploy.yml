@@ -1,0 +1,38 @@
+name: Hexo Auto Deploy
+
+# 只有当 source 分支有代码推送时，才触发这个机器人
+on:
+  push:
+    branches:
+      - source 
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 使用最新的 Ubuntu 系统作为环境
+
+    steps:
+      # 1. 把你的源码下载到机器人所在的虚拟机里
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      # 2. 安装 Node.js 环境
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20' # 建议用和你本地一致的 Node 版本
+
+      # 3. 安装 Hexo 及其所有插件（依赖）
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. 生成网页并部署
+      - name: Deploy to GitHub Pages
+        env:
+          # 这一行最关键：让机器人从你之前设置的 Secrets 库里提取 GH_TOKEN 钥匙
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config --global user.name "xcxxx-822"
+          git config --global user.email "你的邮箱"
+          ./node_modules/.bin/hexo clean
+          ./node_modules/.bin/hexo generate
+          ./node_modules/.bin/hexo deploy
