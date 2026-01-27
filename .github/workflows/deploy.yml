@@ -1,6 +1,6 @@
 name: Hexo Auto Deploy
 
-# 只有当 source 分支有代码推送时，才触发这个机器人
+# 只有当 source 分支有新代码推送时，才触发机器人
 on:
   push:
     branches:
@@ -8,31 +8,40 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 使用最新的 Ubuntu 系统作为环境
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. 把你的源码下载到机器人所在的虚拟机里
+      # 1. 检查代码：把 source 分支的源码下载到虚拟机
       - name: Checkout Source
         uses: actions/checkout@v3
 
-      # 2. 安装 Node.js 环境
+      # 2. 安装 Node.js：使用最新的稳定版
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20' # 建议用和你本地一致的 Node 版本
+          node-version: '20'
 
-      # 3. 安装 Hexo 及其所有插件（依赖）
+      # 3. 安装依赖：安装 Hexo 和相关插件
       - name: Install Dependencies
         run: npm install
 
-      # 4. 生成网页并部署
+      # 4. 部署：生成网页并推送到 main 分支
       - name: Deploy to GitHub Pages
         env:
-          # 这一行最关键：让机器人从你之前设置的 Secrets 库里提取 GH_TOKEN 钥匙
+          # 从你仓库的 Settings > Secrets 拿取名为 GH_TOKEN 的钥匙
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          # 配置虚拟机的 Git 用户信息
           git config --global user.name "xcxxx-822"
-          git config --global user.email "你的邮箱"
+          git config --global user.email "1321510521@qq.com"
+          
+          # 清理并生成静态文件
           ./node_modules/.bin/hexo clean
           ./node_modules/.bin/hexo generate
+          
+          # 关键一步：在部署前，通过变量把钥匙注入到远程地址中
+          # 这样 hexo deploy 就会默认使用这个带授权的地址
+          git remote set-url origin https://${GH_TOKEN}@github.com/xcxxx-822/xcxxx-822.github.io.git
+          
+          # 执行部署
           ./node_modules/.bin/hexo deploy
