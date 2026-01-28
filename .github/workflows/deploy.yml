@@ -31,17 +31,19 @@ jobs:
           # 从你仓库的 Settings > Secrets 拿取名为 GH_TOKEN 的钥匙
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          # 配置虚拟机的 Git 用户信息
+          # 1. 配置 Git 身份
           git config --global user.name "xcxxx-822"
-          git config --global user.email "1321510521@qq.com"
+          git config --global user.email "1321510521@example.com"
           
-          # 清理并生成静态文件
+          # 2. 生成静态网页
           ./node_modules/.bin/hexo clean
           ./node_modules/.bin/hexo generate
           
-          # 关键一步：在部署前，通过变量把钥匙注入到远程地址中
-          # 这样 hexo deploy 就会默认使用这个带授权的地址
-          git remote set-url origin https://${GH_TOKEN}@github.com/xcxxx-822/xcxxx-822.github.io.git
+          # 3. 这里的逻辑变了：直接进入生成的 public 文件夹手动推送
+          cd public
+          git init
+          git add .
+          git commit -m "Site updated: $(date)"
           
-          # 执行部署
-          ./node_modules/.bin/hexo deploy
+          # 4. 强制推送到你的 main 分支（这里注入 Token）
+          git push --force https://${GH_TOKEN}@github.com/xcxxx-822/xcxxx-822.github.io.git master:main
